@@ -30,3 +30,11 @@ async def update_task(task_id: str, updated_task: Task):
             tasks[index] = updated_task
             return updated_task
     raise HTTPException(status_code=404, detail="Task not found")
+
+@router.delete("/{task_id}")
+async def delete_task(task_id: str):
+    for index, task in enumerate(tasks):
+        if task.id == task_id:
+            del tasks[index]
+            return [{"status": "deleted"}]
+    raise HTTPException(status_code=404, detail="Task not found")
