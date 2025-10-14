@@ -23,7 +23,7 @@ async def get_task_by_id(task_id: str):
             return task
     raise HTTPException(status_code=404, detail="Task not found")
 
-@router.get("/{task_id}", response_model=Task)
+@router.put("/{task_id}", response_model=Task)
 async def update_task(task_id: str, updated_task: Task):
     for index, task in enumerate(tasks):
         if task.id == task_id:
