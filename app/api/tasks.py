@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.models.task import Task
 from typing import List
 
@@ -15,3 +15,10 @@ async def get_all_tasks():
 async def create_task(task: Task):
     tasks.append(task)
     return task
+
+@router.get("/{task_id}", response_model=Task)
+async def get_task_by_id(task_id: str):
+    for task in tasks:
+        if task.id == task_id:
+            return task
+    raise HTTPException(status_code=404, detail="Task not found")
