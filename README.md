@@ -48,8 +48,8 @@ This project is part of a personal learning path in **Software Engineering**, ai
 |-------|--------------|--------|
 | 1 | Repository setup + documentation | ✅ Done |
 | 2 | API base (`/health`) | ✅ Done |
-| 3 | CRUD operations (in-memory → DB) | 🚧 In progress |
-| 4 | SQLite / SQLAlchemy integration | ⏳ Planned |
+| 3 | CRUD operations (in-memory → DB) | ✅ Done |
+| 4 | SQLite / SQLAlchemy integration | 🚧 In progress |
 | 5 | Testing & refactoring | ⏳ Planned |
 | 6 | Docker & GitHub Actions | ⏳ Planned |
 | 7 | Postgres & improvements | ⏳ Planned |
@@ -108,7 +108,7 @@ fastapi run main.py
 
 Open your browser or use curl/Postman to check the health endpoint:
 
-> GET http://127.0.0.1:8000/api/v1/health
+> GET http://127.0.0.1:8000/api/health
 
 Expected response:
 
