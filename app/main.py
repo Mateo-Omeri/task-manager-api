@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .api import health, tasks
+from app.routers import health, tasks
 
 app = FastAPI(title = 'Todo API')
 
