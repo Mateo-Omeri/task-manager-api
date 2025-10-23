@@ -1,6 +1,3 @@
-from pydantic import BaseModel, Field
-from typing import Optional
-from uuid import uuid4
 from sqlalchemy import Column, Integer, String, Boolean
 from app.db import Base
 

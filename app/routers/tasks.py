@@ -1,40 +1,37 @@
-from fastapi import APIRouter, HTTPException
-from app.models.task import Task
-from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status
+from app.db import get_db
+from app.repositories.task_repository import TaskRepository
+from app.schemas.task import TaskCreate, TaskUpdate, TaskResponse
 
 router = APIRouter(prefix = "/tasks", tags = ["tasks"])
 
-#temporary in-memory storge
-tasks: list[Task] = []
+def get_task_repo(db=Depends(get_db)):
+    return TaskRepository(db)
 
-@router.get("/", response_model=List[Task])
-async def get_all_tasks():
-    return tasks
+@router.get("/tasks", response_model=list[TaskResponse])
+def list_tasks(repo: TaskRepository = Depends(get_task_repo)):
+    return repo.get_all()
 
-@router.post("/", response_model=Task)
-async def create_task(task: Task):
-    tasks.append(task)
+@router.post("/", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+def create_task(task: TaskCreate, repo: TaskRepository = Depends(get_task_repo)):
+    return repo.create(task)
+
+@router.get("/{task_id}", response_model=TaskResponse)
+def get_task(task_id: int, repo: TaskRepository = Depends(get_task_repo)):
+    task = repo.get_by_id(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
     return task
 
-@router.get("/{task_id}", response_model=Task)
-async def get_task_by_id(task_id: str):
-    for task in tasks:
-        if task.id == task_id:
-            return task
-    raise HTTPException(status_code=404, detail="Task not found")
+@router.put("/{task_id}", response_model=TaskResponse)
+def update_task(task_id: int, task: TaskUpdate, repo: TaskRepository = Depends(get_task_repo)):
+    updated = repo.update(task_id, task)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return updated
 
-@router.put("/{task_id}", response_model=Task)
-async def update_task(task_id: str, updated_task: Task):
-    for index, task in enumerate(tasks):
-        if task.id == task_id:
-            tasks[index] = updated_task
-            return updated_task
-    raise HTTPException(status_code=404, detail="Task not found")
-
-@router.delete("/{task_id}")
-async def delete_task(task_id: str):
-    for index, task in enumerate(tasks):
-        if task.id == task_id:
-            del tasks[index]
-            return [{"status": "deleted"}]
-    raise HTTPException(status_code=404, detail="Task not found")
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(task_id: int, repo: TaskRepository = Depends(get_task_repo)):
+    deleted = repo.delete(task_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Task not found")
