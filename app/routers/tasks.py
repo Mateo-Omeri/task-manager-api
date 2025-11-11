@@ -11,7 +11,7 @@ def get_task_repo(db=Depends(get_db)):
     return TaskRepository(db)
 
 
-@router.get("/tasks", response_model=list[TaskResponse])
+@router.get("/", response_model=list[TaskResponse])
 def list_tasks(repo: TaskRepository = Depends(get_task_repo)):
     return repo.get_all()
 
