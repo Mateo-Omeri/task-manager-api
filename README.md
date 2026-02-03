@@ -1,91 +1,151 @@
 # 📝 To-Do List API
+![CI](https://github.com/Mateo-Omeri/task-manager-api/actions/workflows/ci.yml/badge.svg)
 
-A simple yet production-grade **To-Do List REST API**, built to practice **Software Engineering principles** such as *Clean Code*, *Testing*, *CI/CD* and *Containerization*.  
-The project evolves step-by-step following concepts from **Clean Code** and **The Pragmatic Programmer**.
+A minimal yet production-oriented REST API for task management, designed to practice software engineering fundamentals such as:
+
+- layered architecture  
+- separation of concerns  
+- automated testing  
+- continuous integration  
+- containerization  
+
+The domain (to-do tasks) is intentionally simple, while the engineering practices mirror real-world backend systems.
 
 ---
 
 ## 🚀 Overview
 
-This API allows users to manage tasks through REST endpoints — create, list, update, and delete to-dos.  
-Although simple in purpose, the project is designed as if it were a real product, with attention to:
-- modular architecture (routers, services, repositories),
-- automated testing and CI/CD,
-- Docker and cloud deployment,
-- and progressive refactoring.
+The API exposes CRUD endpoints to manage tasks:
+
+- create tasks  
+- list tasks  
+- update tasks  
+- delete tasks  
+
+Although functionally simple, the project is structured as if it were a production service, with attention to:
+
+- explicit architectural layers  
+- testability  
+- reproducible environments  
+- CI enforcement  
+- progressive refactoring
 
 ---
 
 ## 🧩 Tech Stack
 
-| Category | Technology |
-|-----------|-------------|
-| Language | **Python 3.12+** |
-| Framework | **FastAPI** |
-| Database | **SQLite** → **PostgreSQL** (via Docker Compose) |
-| ORM / Models | **SQLAlchemy** or **SQLModel** |
-| Testing | **pytest** |
-| Containerization | **Docker** |
-| CI/CD | **GitHub Actions** |
-| Deployment | Local (Docker Compose) → Cloud (Render / GCP Cloud Run) |
+| Category              | Technology                          |
+|-----------------------|-------------------------------------|
+| Language              | Python 3.12                         |
+| Web framework         | FastAPI                             |
+| ORM                   | SQLAlchemy                          |
+| Data validation       | Pydantic                            |
+| Database              | SQLite (default) / PostgreSQL (Docker Compose) |
+| Testing               | pytest                              |
+| Linting & formatting  | ruff, black, isort, pre-commit      |
+| Containerization      | Docker                              |
+| CI                    | GitHub Actions                      |
 
 ---
 
-## 📚 Learning Goals
+## 🏗️ Architecture
 
-This project is part of a personal learning path in **Software Engineering**, aiming to:
-- Apply *Clean Code* and *Pragmatic Programmer* principles
-- Practice automated testing and continuous integration
-- Learn Dockerization and CI/CD pipelines
-- Understand deployment both locally and in the cloud
-- Build maintainable, testable, and readable code
-
----
-
-## 🗓️ Project Roadmap
-
-| Phase | Description | Status |
-|-------|--------------|--------|
-| 1 | Repository setup + documentation | ✅ Done |
-| 2 | API base (`/health`) | ✅ Done |
-| 3 | CRUD operations (in-memory → DB) | ✅ Done |
-| 4 | SQLite / SQLAlchemy integration | 🚧 In progress |
-| 5 | Testing & refactoring | ⏳ Planned |
-| 6 | Docker & GitHub Actions | ⏳ Planned |
-| 7 | Postgres & improvements | ⏳ Planned |
-| 8 | Deployment (local + PaaS) | ⏳ Planned |
-| 9 | Cloud deployment (GCP Cloud Run) | ⏳ Planned |
-
----
-
-## 🏗️ Project Structure (planned)
+The application follows a layered architecture:
 
 ```text
 app/
- ├── main.py            # FastAPI entry point
- ├── models/            # Pydantic/SQLModel models
- ├── routers/           # API endpoints
- ├── services/          # Business logic
- ├── repositories/      # DB access layer
-
-tests/
- ├── unit/
- └── integration/
+ ├── main.py            # FastAPI application entrypoint
+ ├── routers/           # HTTP layer (request/response handling)
+ ├── services/          # Business logic layer (optional / extensible)
+ ├── repositories/      # Persistence layer (DB access)
+ ├── models/            # SQLAlchemy ORM models
+ ├── schemas/           # Pydantic DTOs
+ ├── core/              # Cross-cutting concerns (logging, errors)
+ └── db.py              # Database configuration and session management
 ```
+### Layer Responsibilities
 
-*(Will be created progressively as the project evolves.)*
+#### Routers
+- Define HTTP endpoints  
+- Perform request validation through schemas  
+- Delegate logic to repositories/services  
+- Map domain errors to HTTP responses  
+
+#### Repositories
+- Encapsulate all database interactions  
+- Provide CRUD operations  
+- Abstract SQLAlchemy session usage from higher layers  
+
+#### Schemas (Pydantic)
+- Define request/response contracts  
+- Enforce validation and serialization  
+
+#### Models (SQLAlchemy)
+- Represent persistent entities  
+- Map directly to database tables  
+
+#### Core
+- Centralized logging configuration  
+- Global exception handlers for consistent error responses  
+
+#### DB Module
+- Manages SQLAlchemy engine and sessions  
+- Supports dynamic backend selection (SQLite vs PostgreSQL via env var)  
+
+This structure ensures:
+
+- loose coupling between HTTP and persistence layers  
+- easier refactoring  
+- improved testability  
+- clear ownership of responsibilities
 
 ---
 
-## ⚙️ Setup (coming soon)
+## 🧪 Testing Strategy
 
-Instructions for running the app locally and via Docker will appear here once the first endpoints are implemented.
+Tests are split by scope:
+
+```text
+tests/
+ ├── unit/          # Isolated behavior tests
+ └── integration/   # Full API tests with real DB session
+```
+### Unit Tests
+- model defaults  
+- error handlers  
+- health endpoint  
+- pure logic behavior  
+
+### Integration Tests
+- use a temporary SQLite database  
+- exercise full request lifecycle:  
+  - POST → GET → PUT → DELETE  
+- validate:
+  - HTTP status codes  
+  - response schemas  
+  - persistence correctness  
+
+The integration tests override the application DB dependency to ensure isolation.
+
+**Current coverage: ~90%+**
+
+---
+
+## ⚠️ Design Trade-offs
+
+| Decision          | Rationale                              |
+|-------------------|----------------------------------------|
+| SQLite by default | Zero configuration for local dev       |
+| No authentication | Focus on architecture and tooling      |
+| Simple domain     | Emphasis on engineering practices      |
+| No migrations yet | Avoid premature complexity             |
+| FastAPI           | Rapid development + automatic OpenAPI docs |
+
+The project prioritizes engineering correctness over feature richness.
 
 ---
 
 ## ⚙️ Installation
-
-Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/Mateo-Omeri/task-manager-api.git
@@ -93,38 +153,104 @@ cd task-manager-api
 pip install -r requirements.txt
 ```
 
-> It's recommended to use a virtual environment (venv) to isolate dependencies, but it's not mandatory.
-
 ---
 
-## ▶️ Run the API (development)
-
-Once your environment is ready (see Installation), run the FastAPI app locally:
+## ▶️ Run locally
 
 ```bash
-cd app/
-fastapi run main.py
+uvicorn app.main:app --reload
 ```
 
-Open your browser or use curl/Postman to check the health endpoint:
+Health check:
+```http
+GET http://127.0.0.1:8000/api/health
+```
 
-> GET http://127.0.0.1:8000/api/health
-
-Expected response:
-
+Response:
 ```json
 {"status": "ok"}
 ```
 
 ---
 
-## ▶️ Run tests (development)
-
-Once your environment is ready (see Installation), run the tests as follows:
+## ▶️ Run tests
 
 ```bash
-cd tests/
 pytest
 ```
 
-> All tests should pass successfully. Future tests for CRUD endpoints, database integration, and other features will be added progressively.
+---
+
+## 🐳 Docker
+
+Build image:
+
+```bash
+docker build -t todo-api .
+```
+
+Run container:
+```bash
+docker run -p 8000:8000 todo-api
+```
+The application uses SQLite by default.
+
+---
+
+## 🔄 Continuous Integration
+
+A GitHub Actions workflow runs on:
+
+- every push  
+- every pull request  
+
+Pipeline steps:
+
+1. Setup Python  
+2. Install dependencies  
+3. Run linters & formatters  
+4. Execute test suite  
+
+This guarantees:
+
+- code quality enforcement  
+- test correctness  
+- stable main branch  
+
+---
+
+## 🎯 Learning Objectives
+
+This project was built to practice:
+
+- API design  
+- layered architecture  
+- automated testing  
+- CI pipelines  
+- Dockerization  
+- safe refactoring  
+
+It serves as a technical foundation for future projects in:
+
+- backend systems  
+- ETL services  
+- data ingestion pipelines  
+
+---
+
+## 📌 Status
+
+**Completed:**
+- CRUD API  
+- layered structure  
+- logging  
+- tests  
+- CI  
+- Docker  
+
+**Optional future extensions:**
+- PostgreSQL  
+- Alembic migrations  
+- deployment
+
+---
